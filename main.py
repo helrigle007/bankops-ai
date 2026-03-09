@@ -102,8 +102,6 @@ def _format_result(result: dict):
 
 def run_interactive_demo():
     """Run an interactive demo processing sample banking requests."""
-    from agents.supervisor import process_request
-
     sample_requests = [
         "I need to send a wire transfer of $75,000 from account ACC-10042 to our vendor at Chase Bank. Routing number 021000021, account 483291056, beneficiary Apex Supply Co.",
         "There's a $3,200 charge on account ACC-10042 from March 5th that I did not authorize. I think someone may have compromised our account.",
@@ -123,6 +121,9 @@ def run_interactive_demo():
         border_style="blue",
         padding=(1, 3),
     ))
+
+    with console.status("[bold cyan]Loading agent pipeline...[/bold cyan]", spinner="dots"):
+        from agents.supervisor import process_request
 
     for i, request in enumerate(sample_requests, 1):
         try:
@@ -151,7 +152,8 @@ def run_interactive_demo():
 
 def run_single_request(request: str):
     """Process a single customer request."""
-    from agents.supervisor import process_request
+    with console.status("[bold cyan]Loading agent pipeline...[/bold cyan]", spinner="dots"):
+        from agents.supervisor import process_request
 
     console.print("\n\n")
     console.print(Rule("[bold cyan] Request [/bold cyan]", style="cyan"))
@@ -173,13 +175,15 @@ def run_single_request(request: str):
 
 def run_eval():
     """Run the evaluation suite."""
-    from evals.eval_runner import run_full_eval
+    with console.status("[bold cyan]Loading evaluation framework...[/bold cyan]", spinner="dots"):
+        from evals.eval_runner import run_full_eval
     run_full_eval(verbose=True)
 
 
 def run_ingest():
     """Build or rebuild the knowledge base."""
-    from knowledge.ingest import load_policies, chunk_documents, build_vectorstore
+    with console.status("[bold cyan]Loading ingestion pipeline...[/bold cyan]", spinner="dots"):
+        from knowledge.ingest import load_policies, chunk_documents, build_vectorstore
 
     docs = load_policies()
     chunks = chunk_documents(docs)
