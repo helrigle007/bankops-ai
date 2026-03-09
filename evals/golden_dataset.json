@@ -1,0 +1,92 @@
+[
+  {
+    "id": "eval-001",
+    "request": "I need to send a wire transfer of $75,000 from account ACC-10042 to our vendor at Chase Bank.",
+    "expected_intent": "wire_transfer",
+    "expected_min_confidence": 0.85,
+    "expected_escalation": "human_review",
+    "expected_entities": {"account_id": "ACC-10042", "amount": 75000},
+    "notes": "Clear wire request but $75k exceeds $50k review threshold for high-risk intents — requires human review"
+  },
+  {
+    "id": "eval-002",
+    "request": "There's a $3,200 charge on account ACC-10042 from March 5th that I did not authorize. Someone may have accessed our account.",
+    "expected_intent": "dispute",
+    "expected_min_confidence": 0.80,
+    "expected_escalation": "urgent_escalation",
+    "expected_entities": {"account_id": "ACC-10042", "amount": 3200},
+    "notes": "Unauthorized charge with compromise language — should escalate"
+  },
+  {
+    "id": "eval-003",
+    "request": "What's the current balance on our money market account ACC-10156?",
+    "expected_intent": "account_inquiry",
+    "expected_min_confidence": 0.90,
+    "expected_escalation": "auto_resolve",
+    "expected_entities": {"account_id": "ACC-10156"},
+    "notes": "Simple balance check — high confidence auto-resolve"
+  },
+  {
+    "id": "eval-004",
+    "request": "We need to add our new CFO David Park as an authorized signer on account ACC-10089. What documentation do we need?",
+    "expected_intent": "account_maintenance",
+    "expected_min_confidence": 0.85,
+    "expected_escalation": "auto_resolve",
+    "expected_entities": {"account_id": "ACC-10089"},
+    "notes": "Signer addition request — clear intent"
+  },
+  {
+    "id": "eval-005",
+    "request": "What are the OFAC screening requirements for international wire transfers over $50,000?",
+    "expected_intent": "compliance_question",
+    "expected_min_confidence": 0.80,
+    "expected_escalation": "auto_resolve",
+    "expected_entities": {},
+    "notes": "Policy question — should route to RAG agent"
+  },
+  {
+    "id": "eval-006",
+    "request": "I need to urgently recall a $250,000 wire I sent this morning to the wrong beneficiary. Account ACC-10089. This was sent about 20 minutes ago.",
+    "expected_intent": "wire_transfer",
+    "expected_min_confidence": 0.85,
+    "expected_escalation": "urgent_escalation",
+    "expected_entities": {"account_id": "ACC-10089", "amount": 250000},
+    "notes": "Urgent recall + high amount — must escalate immediately"
+  },
+  {
+    "id": "eval-007",
+    "request": "Can you check on case CASE-8812? I filed a dispute last week and haven't heard back.",
+    "expected_intent": "dispute",
+    "expected_min_confidence": 0.80,
+    "expected_escalation": "auto_resolve",
+    "expected_entities": {"case_id": "CASE-8812"},
+    "notes": "Case status check — straightforward lookup"
+  },
+  {
+    "id": "eval-008",
+    "request": "We're closing our business and need to close account ACC-10156 and get the remaining balance sent to us.",
+    "expected_intent": "account_maintenance",
+    "expected_min_confidence": 0.80,
+    "expected_escalation": "auto_resolve",
+    "expected_entities": {"account_id": "ACC-10156"},
+    "notes": "Account closure request — clear intent"
+  },
+  {
+    "id": "eval-009",
+    "request": "I got an email saying our account was compromised and someone changed the authorized signers. Account ACC-10042. I need this locked down NOW.",
+    "expected_intent": "dispute",
+    "expected_min_confidence": 0.70,
+    "expected_escalation": "urgent_escalation",
+    "expected_entities": {"account_id": "ACC-10042"},
+    "notes": "Account compromise — must escalate regardless of confidence"
+  },
+  {
+    "id": "eval-010",
+    "request": "Hey, I have a question about something but I'm not really sure who to ask. It's about our account maybe?",
+    "expected_intent": "general_inquiry",
+    "expected_min_confidence": 0.40,
+    "expected_escalation": "urgent_escalation",
+    "expected_entities": {},
+    "notes": "Vague request — low confidence should trigger escalation"
+  }
+]
