@@ -36,23 +36,11 @@ ESCALATION_STYLES = {
 }
 
 
-def _format_result(result: dict, request_num: int = None, request_text: str = None):
+def _format_result(result: dict):
     """Format a pipeline result with Rich panels and tables."""
     meta = result.get("metadata", {})
     escalation_level = meta.get("escalation_level", "auto_resolve")
     esc_color, esc_label = ESCALATION_STYLES.get(escalation_level, ("white", escalation_level))
-
-    # Request header
-    if request_num and request_text:
-        console.print("\n\n")
-        console.print(Rule(f"[bold cyan] Request {request_num} [/bold cyan]", style="cyan"))
-        console.print()
-        console.print(Panel(
-            request_text,
-            title="[bold]Customer Request[/bold]",
-            border_style="cyan",
-            padding=(1, 2),
-        ))
 
     # Pipeline metadata table
     pipeline_table = Table(
@@ -138,12 +126,21 @@ def run_interactive_demo():
 
     for i, request in enumerate(sample_requests, 1):
         try:
+            console.print("\n\n")
+            console.print(Rule(f"[bold cyan] Request {i} [/bold cyan]", style="cyan"))
+            console.print()
+            console.print(Panel(
+                request,
+                title="[bold]Customer Request[/bold]",
+                border_style="cyan",
+                padding=(1, 2),
+            ))
             with console.status(
                 f"[bold cyan]Processing request {i}/{len(sample_requests)}...[/bold cyan]",
                 spinner="dots",
             ):
                 result = process_request(request)
-            _format_result(result, request_num=i, request_text=request)
+            _format_result(result)
         except Exception as e:
             console.print(f"\n[bold red]Error processing request {i}:[/bold red] {e}")
 
@@ -156,13 +153,21 @@ def run_single_request(request: str):
     """Process a single customer request."""
     from agents.supervisor import process_request
 
+    console.print("\n\n")
+    console.print(Rule("[bold cyan] Request [/bold cyan]", style="cyan"))
     console.print()
+    console.print(Panel(
+        request,
+        title="[bold]Customer Request[/bold]",
+        border_style="cyan",
+        padding=(1, 2),
+    ))
     with console.status(
         "[bold cyan]Processing request...[/bold cyan]",
         spinner="dots",
     ):
         result = process_request(request)
-    _format_result(result, request_num=1, request_text=request)
+    _format_result(result)
     console.print()
 
 
