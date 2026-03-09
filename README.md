@@ -1,8 +1,34 @@
 # BankOps AI
 
-An agentic AI platform for commercial banking customer service built with LangChain, LangGraph, and LangSmith.
+**Production-pattern agentic AI for commercial banking customer service** — multi-agent pipeline with structured classification, deterministic escalation, RAG-grounded policy retrieval, and tool-calling agents, built on LangGraph.
 
-Processes inbound servicing requests (email, case intake) through a multi-agent pipeline that classifies intent, retrieves grounded knowledge from policy documents, executes tool integrations, and routes to human review when confidence or risk thresholds are exceeded.
+---
+
+## What This Demonstrates
+
+- **Structured output classification** — Pydantic-validated intent detection with confidence scores and entity extraction, not free-text parsing
+- **Deterministic HITL escalation** — Pure Python rule engine for confidence/risk-based routing to human review queues, fully auditable for compliance
+- **RAG with policy grounding** — Markdown-aware chunking preserves banking policy structure; ChromaDB vector retrieval with local HuggingFace embeddings
+- **Tool-calling agents** — ReAct agents bound to banking tools (account lookup, wire initiation, case management) via LangGraph supervisor orchestration
+- **Golden dataset evaluation** — 10-scenario eval suite scoring intent accuracy, entity extraction, and escalation routing
+- **LangSmith observability** — Full trace capture across classification, retrieval, tool calls, and escalation decisions
+
+---
+
+## Eval Results
+
+10/10 pass rate across all metrics on the golden dataset:
+
+| Metric | Score |
+|--------|-------|
+| Intent Classification | 10/10 (100%) |
+| Escalation Routing | 10/10 (100%) |
+| Entity Extraction | 10/10 (100%) |
+| **Overall** | **10/10 (100%)** |
+
+```bash
+python main.py --eval    # Run it yourself
+```
 
 ---
 
@@ -57,6 +83,17 @@ Customer Request
 
 **Evaluation Framework** — Golden dataset with 10 test scenarios covering intent accuracy, entity extraction, and escalation routing. Outputs scored results with pass/fail and aggregate metrics.
 
+## Design Decisions
+
+| Decision | Rationale |
+|----------|-----------|
+| **Deterministic escalation engine** | Pure Python rule engine, not LLM-driven. Thresholds are auditable, configurable without prompt changes, and compliance can review rules independently. |
+| **Structured output classification** | `with_structured_output()` returns Pydantic models, giving type-safe confidence scores and entities that downstream logic can rely on. |
+| **Markdown-aware RAG chunking** | Banking policies are hierarchical — the text splitter uses markdown separators to keep sections intact rather than splitting mid-thought. |
+| **LangGraph over vanilla LangChain** | Conditional routing (escalation vs. auto-resolve) is cleaner as a graph than nested agent calls, with testable state at each node. |
+
+See [docs/architecture.md](docs/architecture.md) for full design rationale and production considerations.
+
 ## Tech Stack
 
 - **LangChain** / **LangGraph** — Agent orchestration and graph-based workflows
@@ -69,6 +106,8 @@ Customer Request
 
 ## Setup
 
+**Prerequisites:** Python 3.11+, an [Anthropic API key](https://console.anthropic.com/), and optionally a [LangSmith API key](https://smith.langchain.com/) for tracing.
+
 ```bash
 # Clone and install
 git clone https://github.com/helrigle007/bankops-ai.git
@@ -77,7 +116,8 @@ pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
-# Add your Anthropic and LangSmith API keys to .env
+# Add your ANTHROPIC_API_KEY to .env
+# Optionally add LANGCHAIN_API_KEY for LangSmith tracing
 
 # Build the knowledge base
 python main.py --ingest

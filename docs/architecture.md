@@ -33,3 +33,4 @@ This is a demonstration platform. In a production deployment, the following woul
 - **Model fallbacks**: Primary model failures would fall back to a secondary model with degraded but functional service
 - **Rate limiting**: Token budgets per request to prevent runaway agent loops
 - **Secrets management**: API keys managed through AWS Secrets Manager or HashiCorp Vault, never in environment variables
+- **Model choice**: LLM calls use Anthropic Claude (claude-sonnet-4-6) for strong structured output and tool-calling support. Embeddings use HuggingFace all-MiniLM-L6-v2 running locally — no external embedding API dependency, reducing latency and cost for the retrieval pipeline

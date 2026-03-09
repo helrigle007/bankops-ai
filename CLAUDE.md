@@ -77,14 +77,7 @@ python main.py --eval       # Run golden dataset evaluation
 python main.py --request "Check balance on ACC-10042"
 ```
 
-## What Needs Work
-
-### Must-do before pushing to GitHub
-- Run `python main.py` end-to-end and verify all 5 demo requests produce reasonable output
-- Run `python main.py --eval` and check pass rates — tune classification prompt or escalation thresholds if accuracy is low
-- Verify `python main.py --ingest` builds the ChromaDB store without errors
-
-### Nice-to-have improvements
+## Future Improvements
 - Add LangSmith evaluation integration (log eval runs as datasets/experiments)
 - Add a Streamlit or Gradio UI for interactive demo
 - Add more policy documents (ACH, loan servicing, KYC)
@@ -93,7 +86,7 @@ python main.py --request "Check balance on ACC-10042"
 - Add cost tracking per request (token counts from LangSmith traces)
 - Add a Docker setup for reproducibility
 
-### Do not change
+## Do not change
 - The escalation thresholds in `agents/escalation.py` are intentional — they map to the JD's description of confidence/risk-based HITL routing
 - The simulated tool data in `tools/banking_tools.py` is referenced by the golden dataset eval cases — if you change account IDs or amounts, update the evals too
 - The policy docs in `knowledge/policies/` are written to be realistic for commercial banking — keep them consistent if adding new ones
