@@ -98,8 +98,12 @@ def run_full_eval(verbose: bool = True) -> dict:
 
     console.print(f"\n[bold]Running {len(dataset)} evaluation cases...[/bold]\n")
 
-    for case in dataset:
-        result = evaluate_single(case)
+    for idx, case in enumerate(dataset, 1):
+        with console.status(
+            f"[bold cyan]Evaluating case {idx}/{len(dataset)}...[/bold cyan]",
+            spinner="dots",
+        ):
+            result = evaluate_single(case)
         results.append(result)
 
         if verbose:
