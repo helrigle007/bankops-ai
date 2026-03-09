@@ -43,7 +43,7 @@ def _format_result(result: dict, request_num: int = None, request_text: str = No
 
     # Request header
     if request_num and request_text:
-        console.print()
+        console.print("\n\n")
         console.print(Rule(f"[bold cyan] Request {request_num} [/bold cyan]", style="cyan"))
         console.print()
         console.print(Panel(
