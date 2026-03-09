@@ -22,6 +22,7 @@ from rich.markdown import Markdown
 from rich.rule import Rule
 from rich.columns import Columns
 from rich.text import Text
+from rich.status import Status
 
 load_dotenv()
 console = Console()
@@ -137,7 +138,11 @@ def run_interactive_demo():
 
     for i, request in enumerate(sample_requests, 1):
         try:
-            result = process_request(request)
+            with console.status(
+                f"[bold cyan]Processing request {i}/{len(sample_requests)}...[/bold cyan]",
+                spinner="dots",
+            ):
+                result = process_request(request)
             _format_result(result, request_num=i, request_text=request)
         except Exception as e:
             console.print(f"\n[bold red]Error processing request {i}:[/bold red] {e}")
@@ -152,7 +157,11 @@ def run_single_request(request: str):
     from agents.supervisor import process_request
 
     console.print()
-    result = process_request(request)
+    with console.status(
+        "[bold cyan]Processing request...[/bold cyan]",
+        spinner="dots",
+    ):
+        result = process_request(request)
     _format_result(result, request_num=1, request_text=request)
     console.print()
 
