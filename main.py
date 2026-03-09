@@ -17,10 +17,98 @@ import json
 from dotenv import load_dotenv
 from rich.console import Console
 from rich.panel import Panel
-from rich.json import JSON
+from rich.table import Table
+from rich.markdown import Markdown
+from rich.rule import Rule
+from rich.columns import Columns
+from rich.text import Text
 
 load_dotenv()
 console = Console()
+
+
+ESCALATION_STYLES = {
+    "auto_resolve": ("green", "AUTO-RESOLVE"),
+    "human_review": ("yellow", "HUMAN REVIEW"),
+    "urgent_escalation": ("red", "URGENT ESCALATION"),
+    "manager_approval": ("bright_red", "MANAGER APPROVAL"),
+}
+
+
+def _format_result(result: dict, request_num: int = None, request_text: str = None):
+    """Format a pipeline result with Rich panels and tables."""
+    meta = result.get("metadata", {})
+    escalation_level = meta.get("escalation_level", "auto_resolve")
+    esc_color, esc_label = ESCALATION_STYLES.get(escalation_level, ("white", escalation_level))
+
+    # Request header
+    if request_num and request_text:
+        console.print()
+        console.print(Rule(f"[bold cyan] Request {request_num} [/bold cyan]", style="cyan"))
+        console.print()
+        console.print(Panel(
+            request_text,
+            title="[bold]Customer Request[/bold]",
+            border_style="cyan",
+            padding=(1, 2),
+        ))
+
+    # Pipeline metadata table
+    pipeline_table = Table(
+        show_header=False,
+        box=None,
+        padding=(0, 2),
+        expand=True,
+    )
+    pipeline_table.add_column("Label", style="dim", width=20)
+    pipeline_table.add_column("Value")
+
+    raw_intent = str(meta.get("intent", "unknown"))
+    intent_display = raw_intent.split(".")[-1].lower() if "." in raw_intent else raw_intent
+    pipeline_table.add_row("Intent", f"[bold]{intent_display}[/bold]")
+    pipeline_table.add_row("Confidence", f"{meta.get('confidence', 0):.0%}")
+    pipeline_table.add_row("Urgency", meta.get("urgency", "normal"))
+    pipeline_table.add_row("Escalation", f"[bold {esc_color}]{esc_label}[/bold {esc_color}]")
+
+    tools = meta.get("tools_called", [])
+    if tools:
+        pipeline_table.add_row("Tools Called", ", ".join(tools))
+
+    console.print(Panel(
+        pipeline_table,
+        title="[bold]Pipeline Output[/bold]",
+        border_style="dim",
+        padding=(0, 0),
+    ))
+
+    # Response panel — color border by escalation level
+    response_text = result.get("response", "No response generated.")
+    console.print(Panel(
+        Markdown(response_text),
+        title=f"[bold {esc_color}]Agent Response[/bold {esc_color}]",
+        border_style=esc_color,
+        padding=(1, 2),
+    ))
+
+    # Escalation details if present
+    if result.get("escalation_details"):
+        esc = result["escalation_details"]
+        esc_table = Table(show_header=False, box=None, padding=(0, 2), expand=True)
+        esc_table.add_column("Label", style="dim", width=20)
+        esc_table.add_column("Value")
+        esc_table.add_row("Queue", esc.get("assigned_queue", ""))
+        esc_table.add_row("SLA", f"{esc.get('sla_hours', '')} hours")
+        esc_table.add_row("Reason", esc.get("reason", ""))
+        rules = esc.get("triggered_rules", [])
+        if rules:
+            esc_table.add_row("Triggered Rules", "\n".join(f"- {r}" for r in rules))
+
+        console.print(Panel(
+            esc_table,
+            title="[bold red]Escalation Details[/bold red]",
+            border_style="red",
+            padding=(0, 0),
+        ))
 
 
 def run_interactive_demo():
@@ -35,37 +123,38 @@ def run_interactive_demo():
         "We need to add our new CFO David Park as an authorized signer on account ACC-10089.",
     ]
 
+    console.print()
     console.print(Panel(
-        "[bold]BankOps AI — Agentic Banking Customer Service Platform[/bold]\n\n"
+        "[bold white]BankOps AI[/bold white]\n"
+        "[dim]Agentic Banking Customer Service Platform[/dim]\n\n"
         "Processing sample customer requests through the multi-agent pipeline.\n"
-        "Each request flows through: Classification → Escalation Check → Agent Routing → Response",
-        title="Demo Mode",
+        "Each request flows through:\n\n"
+        "  [cyan]Classification[/cyan] → [yellow]Escalation Check[/yellow] → [green]Agent Routing[/green] → [bold]Response[/bold]",
+        title="[bold blue] Demo Mode [/bold blue]",
         border_style="blue",
+        padding=(1, 3),
     ))
 
     for i, request in enumerate(sample_requests, 1):
-        console.print(f"\n{'='*70}")
-        console.print(f"[bold cyan]Request {i}:[/bold cyan] {request}\n")
-
         try:
             result = process_request(request)
-            console.print(f"[bold green]Response:[/bold green] {result['response']}\n")
-            console.print("[dim]Metadata:[/dim]")
-            console.print(JSON(json.dumps(result["metadata"], indent=2, default=str)))
+            _format_result(result, request_num=i, request_text=request)
         except Exception as e:
-            console.print(f"[bold red]Error:[/bold red] {e}")
+            console.print(f"\n[bold red]Error processing request {i}:[/bold red] {e}")
 
-        console.print()
+    console.print()
+    console.print(Rule("[bold blue] Demo Complete [/bold blue]", style="blue"))
+    console.print()
 
 
 def run_single_request(request: str):
     """Process a single customer request."""
     from agents.supervisor import process_request
 
-    console.print(f"\n[bold cyan]Processing:[/bold cyan] {request}\n")
+    console.print()
     result = process_request(request)
-    console.print(f"[bold green]Response:[/bold green] {result['response']}\n")
-    console.print(JSON(json.dumps(result, indent=2, default=str)))
+    _format_result(result, request_num=1, request_text=request)
+    console.print()
 
 
 def run_eval():
