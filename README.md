@@ -39,22 +39,22 @@ Customer Request
        │
        ▼
 ┌─────────────────┐
-│   Classifier     │  Intent detection + entity extraction
-│  (Structured)    │  → account_id, amount, urgency, confidence
+│   Classifier    │  Intent detection + entity extraction
+│  (Structured)   │  → account_id, amount, urgency, confidence
 └───────┬─────────┘
         │
         ▼
 ┌─────────────────┐
-│   Escalation     │  Confidence + risk threshold evaluation
-│    Engine        │  → auto_resolve | human_review | urgent_escalation
+│   Escalation    │  Confidence + risk threshold evaluation
+│    Engine       │  → auto_resolve | human_review | urgent_escalation
 └───────┬─────────┘
         │
    ┌────┴────┐
    │         │
    ▼         ▼
 ┌──────┐  ┌──────────────┐
-│ Agent │  │  Human Queue  │
-│ Route │  │  (HITL)       │
+│ Agent│  │  Human Queue │
+│ Route│  │  (HITL)      │
 └──┬───┘  └──────────────┘
    │
    ├── Wire Transfer Agent (tool calling)
@@ -64,8 +64,8 @@ Customer Request
    │
    ▼
 ┌─────────────────┐
-│  Structured      │  Response + audit metadata
-│  Output          │  → tools called, confidence, escalation path
+│  Structured     │  Response + audit metadata
+│  Output         │  → tools called, confidence, escalation path
 └─────────────────┘
 ```
 
